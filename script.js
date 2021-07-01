@@ -135,13 +135,25 @@ abiDecoder.addABI(abi);
 var BlockchainSplitwiseContractSpec = web3.eth.contract(abi);
 
 // This is the address of the contract you want to connect to; copy this from Remix
-var contractAddress = "0x8d236b5771d2760eF10CB8773dbC237174d8879f"; // FIXME: fill this in with your contract's address/hash
+var contractAddress = "0xcB6AbDBb802A11347d66739e0585FCCD3e004956"; // FIXME: fill this in with your contract's address/hash
 
 var BlockchainSplitwise = BlockchainSplitwiseContractSpec.at(contractAddress);
 
 // =============================================================================
 //                            Functions To Implement
 // =============================================================================
+
+function unique(arr) {
+  var u = {},
+    a = [];
+  for (var i = 0, l = arr.length; i < l; ++i) {
+    if (!u.hasOwnProperty(arr[i])) {
+      a.push(arr[i]);
+      u[arr[i]] = 1;
+    }
+  }
+  return a;
+}
 
 // You can return either:
 //   - a list of everyone who has ever sent or received an IOU
@@ -151,7 +163,7 @@ function getUsers() {
   console.log("Running getUsers");
   users = BlockchainSplitwise.getUsers.call();
   console.log(users);
-  return users;
+  return unique(users);
 }
 
 function getTotalOwed(user) {
@@ -185,22 +197,31 @@ function add_IOU(creditor, amount) {
 				min_debt = debt
 			}
 		}
+		min_debt = Math.min(min_debt, amount);
 		BlockchainSplitwise.add_IOU(creditor, amount-min_debt, {
 			from: web3.eth.defaultAccount,
 			gas: 1000000,
 		});
-		for (i=0;i<bfs_result.length-1;i++) {
-			BlockchainSplitwise.add_IOU(bfs_result[i], min_debt, {
-				from: bfs_result[i+1],
-				gas: 1000000,
-			});
-		}
+		console.log(
+      "IOU ADDED: ",
+      web3.eth.defaultAccount,
+      creditor,
+      amount - min_debt
+    );
+    for (i = bfs_result.length - 1; i > 0; i--) {
+      BlockchainSplitwise.add_IOU(bfs_result[i - 1], min_debt, {
+        from: bfs_result[i],
+        gas: 1000000,
+      });
+      console.log("IOU ADDED: ",  bfs_result[i],  bfs_result[i  -  1], min_debt);;
+    }
 
 	} else {
 		BlockchainSplitwise.add_IOU(creditor, amount, {
 			from: web3.eth.defaultAccount,
 			gas: 1000000,
 		});
+		console.log("IOU ADDED: ", web3.eth.defaultAccount, creditor, amount);
 	}
 }
 
@@ -263,10 +284,10 @@ function doBFS(start, end, getNeighbors) {
 function getNeighbors(node) {
   neighbors = [];
   users = getUsers();
-  for (i	 in users) {
+  for (i in users) {
     debt = BlockchainSplitwise.lookup.call(node, users[i]).toNumber();
-		
-		console.log("IN GET_NEIGHBORS ",node,users[i], debt)
+
+    console.log("IN GET_NEIGHBORS ", node, users[i], debt);
     if (debt > 0) {
       neighbors.push(users[i]);
     }

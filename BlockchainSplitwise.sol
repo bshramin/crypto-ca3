@@ -18,7 +18,7 @@ contract SplitWise {
         require(amount > 0);
         debtors[msg.sender].lastActivity = block.timestamp;
         if (debtors[creditor].debts[msg.sender] > 0) {
-            if (debtors[creditor].debts[msg.sender] > amount) {
+            if (debtors[creditor].debts[msg.sender] >= amount) {
                 debtors[creditor].debts[msg.sender] -= amount;
                 debtors[creditor].totalOwned -= amount;
             } else {
