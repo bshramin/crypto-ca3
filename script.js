@@ -18,7 +18,114 @@ var GENESIS = '0x000000000000000000000000000000000000000000000000000000000000000
 // This is the ABI for your contract (get it from Remix, in the 'Compile' tab)
 // If you use truffle you can load abi from truffle build folder
 // ============================================================
-var abi = []; // FIXME: fill this in with your contract's ABI
+var abi = [
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "creditor",
+				"type": "address"
+			},
+			{
+				"internalType": "uint32",
+				"name": "amount",
+				"type": "uint32"
+			}
+		],
+		"name": "add_IOU",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "user",
+				"type": "address"
+			}
+		],
+		"name": "getLastActive",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "user",
+				"type": "address"
+			}
+		],
+		"name": "getTotalOwed",
+		"outputs": [
+			{
+				"internalType": "uint32",
+				"name": "",
+				"type": "uint32"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "getUsers",
+		"outputs": [
+			{
+				"internalType": "address[]",
+				"name": "",
+				"type": "address[]"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "debtor",
+				"type": "address"
+			},
+			{
+				"internalType": "address",
+				"name": "creditor",
+				"type": "address"
+			}
+		],
+		"name": "lookup",
+		"outputs": [
+			{
+				"internalType": "uint32",
+				"name": "ret",
+				"type": "uint32"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "sayHello",
+		"outputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	}
+]; // FIXME: fill this in with your contract's ABI
 // ============================================================
 abiDecoder.addABI(abi);
 // call abiDecoder.decodeMethod to use this - see 'getAllFunctionCalls' for more
@@ -27,7 +134,7 @@ abiDecoder.addABI(abi);
 var BlockchainSplitwiseContractSpec = web3.eth.contract(abi);
 
 // This is the address of the contract you want to connect to; copy this from Remix
-var contractAddress = '0x??????????????????????????????????????????????????????' // FIXME: fill this in with your contract's address/hash
+var contractAddress = '0xCfEB869F69431e42cdB54A4F4f105C19C080A601' // FIXME: fill this in with your contract's address/hash
 
 var BlockchainSplitwise = BlockchainSplitwiseContractSpec.at(contractAddress)
 
@@ -36,34 +143,43 @@ var BlockchainSplitwise = BlockchainSplitwiseContractSpec.at(contractAddress)
 //                            Functions To Implement 
 // =============================================================================
 
-// TODO: Add any helper functions here!
 
-// TODO: Return a list of all users (creditors or debtors) in the system
 // You can return either:
 //   - a list of everyone who has ever sent or received an IOU
 // OR
 //   - a list of everyone currently owing or being owed money
 function getUsers() {
-    return [];
+    console.log("Running getUsers")
+		users = BlockchainSplitwise.getUsers.call()
+    console.log(users)
+    return users;
 }
 
-// TODO: Get the total amount owed by the user specified by 'user'
 function getTotalOwed(user) {
-
+    console.log("Running getTotalOwed")
+		total_owed = BlockchainSplitwise.getTotalOwed.call(user).toNumber()
+    console.log(total_owed)
+    return total_owed
 }
 
-// TODO: Get the last time this user has sent or received an IOU, in seconds since Jan. 1, 1970
 // Return null if you can't find any activity for the user.
 // HINT: Try looking at the way 'getAllFunctionCalls' is written. You can modify it if you'd like.
 function getLastActive(user) {
-
+    console.log("Running getLastActive")
+		last_active = BlockchainSplitwise.getLastActive.call(user).toNumber()
+    console.log(last_active)
+    return last_active
 }
 
-// TODO: add an IOU ('I owe you') to the system
 // The person you owe money is passed as 'creditor'
 // The amount you owe them is passed as 'amount'
 function add_IOU(creditor, amount) {
-
+    console.log("Running add_IOU")
+		console.log("Arguments ", creditor, amount)
+		BlockchainSplitwise.add_IOU(
+			creditor, amount,
+			{from: web3.eth.defaultAccount, gas:1000000}
+		);
 }
 
 // =============================================================================

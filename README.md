@@ -1,1 +1,1 @@
-# crypto-ca3
+Decentralized Splitwise built with solidity to be deployed on ethereum network
